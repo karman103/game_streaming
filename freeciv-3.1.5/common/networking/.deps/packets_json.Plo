@@ -1,0 +1,2 @@
+packets_json.lo: packets_json.c ../../gen_headers/fc_config.h
+../../gen_headers/fc_config.h:

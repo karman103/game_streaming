@@ -1,0 +1,42 @@
+ame Server (GPU-backed VM)
+Host the game on a GPU-enabled cloud instance (e.g., AWS G5, Azure NV-series, Paperspace)
+
+Run the game in windowed mode using:
+
+Steam Remote Play / Parsec (for prototyping)
+
+OR Moonlight + Sunshine stack (open-source Nvidia GameStream)
+
+2. Streaming Layer
+Use WebRTC for ultra-low latency video & input
+
+Tools:
+
+Neko (Docker-based WebRTC streaming browser)
+
+OR NoVNC + WebSocket for simpler initial demo (higher latency)
+
+3. Client Interface (Frontend)
+Build a minimal React or plain HTML5 web app that:
+
+Embeds WebRTC stream
+
+Sends keyboard/mouse input to the backend
+
+Authenticates user sessions
+
+4. Backend Orchestration
+Node.js / FastAPI backend
+
+Routes: /start-session, /stop-session, /status
+
+Spins up & kills game containers or VM sessions
+
+Tracks per-user session state (Redis or simple DB)
+
+5. Session Management
+Spin up 1 container per game session (or user VM)
+
+Use Docker or Firecracker microVMs for isolation
+
+Session timeout logic + restart handling
