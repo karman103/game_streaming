@@ -1,5 +1,5 @@
 import React from 'react';
-import './GameCard.css'; // Assuming you have a CSS file for styles
+import '../css/GameCard.css'; // Assuming you have a CSS file for styles
 type Game = {
   id: string;
   name: string;
@@ -12,6 +12,7 @@ type Props = {
 };
 
 const GameCard: React.FC<Props> = ({ game, onStart }) => {
+  console.log('Rendering GameCard for:', game.name , game.id);
   return (
     <div className="game-card">
       <img

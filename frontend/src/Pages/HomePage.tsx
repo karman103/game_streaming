@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import GameRow from './GameRow';
+import GameRow from '../components/GameRow';
+import { useNavigate } from "react-router-dom";
 
 type Game = {
   id: string;
@@ -9,6 +10,8 @@ type Game = {
 
 const HomePage: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
+    const navigate = useNavigate();
+
 
   useEffect(() => {
     // TEMPORARY MOCK DATA
@@ -34,11 +37,19 @@ const HomePage: React.FC = () => {
     setGames(mockGames);
   }, []);
 
+
   const handleStartSession = async (gameId: string) => {
-    alert(`Starting session for game ID: ${gameId}`);
-    // You can simulate navigation:
-    // window.location.href = `/session/${gameId}`;
-  };
+    console.log("Starting session for game:", gameId);
+    try {
+      // const res = await fetch("/api/sessions", { method: "POST" });
+      // const data = await res.json();
+
+      navigate(`/game/${gameId}`);
+    } catch (err) {
+      console.error(err);
+    }
+};
+
 
   return (
     <div className="bg-black min-h-screen text-white">
