@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-
+import ImageStream from "../components/ImageStream";
 const GamePage: React.FC = () => {
   const { gameId } = useParams();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,7 +33,6 @@ const GamePage: React.FC = () => {
     ws.onclose = () => {
       console.log("WebSocket closed");
     };
-
     return () => {
       ws.close();
     };
@@ -42,6 +41,7 @@ const GamePage: React.FC = () => {
   return (
     <div>
       <h1>Game Session: {gameId}</h1>
+      <ImageStream />
       {/* <canvas
         ref={canvasRef}
         width={640}
