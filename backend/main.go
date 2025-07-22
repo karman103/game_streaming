@@ -62,5 +62,26 @@ func main() {
         }
     }))
 
+    app.Get("/ws/stream", websocket.New(func(c *websocket.Conn) {
+        fmt.Println("Client connected")
+        defer c.Close()
+
+        ticker := time.NewTicker(time.Second / 30) // 30 FPS
+        defer ticker.Stop()
+
+        for range ticker.C {
+            imgBytes, err := ioutil.ReadFile("test.png") // replace with game frame
+            if err != nil {
+                log.Println("Error reading frame:", err)
+                break
+            }
+
+            if err := c.WriteMessage(websocket.BinaryMessage, imgBytes); err != nil {
+                log.Println("Error sending frame:", err)
+                break
+            }
+        }
+    }))
+
     log.Fatal(app.Listen(":3000"))
 }
