@@ -1,0 +1,39 @@
+ar 1% Arabic
+bg 0% Bulgarian
+ca 86% Catalan
+cs 1% Czech
+da 1% Danish
+de 80% German
+el 1% Greek
+en_GB 33% British English
+eo 29% Esperanto
+es 30% Spanish
+es_419 0% Latin American Spanish
+et 1% Estonian
+fa 0% Persian
+fi 100% Finnish
+fr 89% French
+ga 4% Irish
+gd 3% Scottish Gaelic
+gl_ES 99% Galician
+he 0% Hebrew
+hu 1% Hungarian
+id 2% Indonesian
+it 1% Italian
+ja 4% Japanese
+ko 0% Korean
+lt 1% Lithuanian
+nb 1% Norwegian Bokmål
+nl 2% Dutch
+pl 100% Polish
+pt 1% Portuguese
+pt_BR 1% Brazilian Portuguese
+ro 1% Romanian
+ru 100% Russian
+sk 1% Slovak
+sr 0% Serbian
+sv 1% Swedish
+tr 1% Turkish
+uk 1% Ukrainian
+zh_CN 1% Simplified Chinese
+zh_TW 20% Traditional Chinese
