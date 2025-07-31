@@ -1,0 +1,5 @@
+make the lucanti game render via docker (maybe try VM as it will SDL)
+convert the backend into MVC architecture
+maybe try webrtc
+deploy on azure/aws free teir 
+
