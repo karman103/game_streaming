@@ -1,0 +1,443 @@
+.game-launcher {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.launcher-header {
+  text-align: center;
+  padding: 3rem 2rem 2rem;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.launcher-header h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.launcher-header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: rgba(255, 68, 68, 0.9);
+  color: white;
+  margin: 0 2rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  animation: slideDown 0.3s ease;
+}
+
+.error-icon {
+  font-size: 1.2rem;
+}
+
+.error-banner button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.error-banner button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.launcher-content {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.games-section, .sessions-section {
+  margin-bottom: 3rem;
+}
+
+.games-section h2, .sessions-section h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.game-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.game-image {
+  width: 100%;
+  height: 120px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.game-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-info {
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.game-info h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.game-info p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.game-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.game-type, .game-port {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.game-actions {
+  margin-top: auto;
+}
+
+.start-button {
+  width: 100%;
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.start-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+}
+
+.start-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sessions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.session-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.session-card:hover {
+  transform: translateY(-2px);
+}
+
+.session-info h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  text-transform: capitalize;
+}
+
+.session-info p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.session-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.running {
+  background: rgba(68, 255, 68, 0.2);
+  color: #44ff44;
+  border: 1px solid rgba(68, 255, 68, 0.3);
+}
+
+.status-badge.stopped {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.session-port {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.session-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.join-button, .stop-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.join-button {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: white;
+}
+
+.join-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(78, 205, 196, 0.4);
+}
+
+.stop-button {
+  background: rgba(255, 68, 68, 0.8);
+  color: white;
+}
+
+.stop-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(255, 68, 68, 0.4);
+}
+
+.launcher-footer {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-info p {
+  margin: 0 0 1rem 0;
+  opacity: 0.8;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: white;
+}
+
+/* Loading State */
+.game-launcher-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .launcher-header {
+    padding: 2rem 1rem 1.5rem;
+  }
+
+  .launcher-header h1 {
+    font-size: 2rem;
+  }
+
+  .launcher-header p {
+    font-size: 1rem;
+  }
+
+  .launcher-content {
+    padding: 1rem;
+  }
+
+  .games-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .sessions-list {
+    grid-template-columns: 1fr;
+  }
+
+  .session-card {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .session-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .launcher-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .game-card, .session-card {
+    padding: 1rem;
+  }
+
+  .game-meta, .session-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .game-card, .session-card, .start-button, .join-button, .stop-button {
+    transition: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .game-card, .session-card {
+    border: 2px solid white;
+  }
+  
+  .start-button, .join-button {
+    background: white;
+    color: black;
+  }
+}

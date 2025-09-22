@@ -1,0 +1,57 @@
+FROM ubuntu:22.04
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libirrlicht-dev \
+    libgettextpo-dev \
+    libfreetype6-dev \
+    libbz2-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libxxf86vm-dev \
+    libgl1-mesa-dev \
+    libsqlite3-dev \
+    libogg-dev \
+    libvorbis-dev \
+    libopenal-dev \
+    libcurl4-gnutls-dev \
+    libluajit-5.1-dev \
+    libgmp-dev \
+    libjsoncpp-dev \
+    libzstd-dev \
+    libhiredis-dev \
+    libspatialindex-dev \
+    libleveldb-dev \
+    libsnappy-dev \
+    libncurses5-dev \
+    libform5-dev \
+    libssl-dev \
+    xvfb \
+    x11-apps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and build Minetest
+WORKDIR /tmp
+RUN git clone --recursive https://github.com/minetest/minetest.git \
+    && cd minetest \
+    && cmake . -DRUN_IN_PLACE=TRUE -DBUILD_SERVER=FALSE \
+    && make -j$(nproc) \
+    && make install
+
+# Create minetest user
+RUN useradd -m -s /bin/bash minetest \
+    && mkdir -p /home/minetest/.minetest/games \
+    && chown -R minetest:minetest /home/minetest
+
+# Switch to minetest user
+USER minetest
+WORKDIR /home/minetest
+
+# Expose port for multiplayer (optional)
+EXPOSE 30000
+
+# Default command
+CMD ["/usr/local/bin/minetest"] 

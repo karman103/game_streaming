@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  minetest-server:
+    image: alpine:3.19
+    container_name: minetest-server
+    ports:
+      - "30000:30000/udp"
+      - "30000:30000/tcp"
+    volumes:
+      - minetest_data:/var/lib/minetest
+      - ./games/minetest:/var/lib/minetest/games/minetest_game:ro
+    working_dir: /var/lib/minetest
+    command: >
+      sh -c "
+        apk add --no-cache minetest-server &&
+        minetestserver --worldname docker_world --port 30000
+      "
+    restart: unless-stopped
+
+volumes:
+  minetest_data: 

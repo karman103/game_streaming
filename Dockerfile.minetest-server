@@ -1,0 +1,56 @@
+FROM ubuntu:22.04
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libirrlicht-dev \
+    libgettextpo-dev \
+    libfreetype6-dev \
+    libbz2-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libxxf86vm-dev \
+    libgl1-mesa-dev \
+    libsqlite3-dev \
+    libogg-dev \
+    libvorbis-dev \
+    libopenal-dev \
+    libcurl4-gnutls-dev \
+    libluajit-5.1-dev \
+    libgmp-dev \
+    libjsoncpp-dev \
+    libzstd-dev \
+    libhiredis-dev \
+    libspatialindex-dev \
+    libleveldb-dev \
+    libsnappy-dev \
+    libncurses5-dev \
+    libform5-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and build Minetest (server only)
+WORKDIR /tmp
+RUN git clone --recursive https://github.com/minetest/minetest.git \
+    && cd minetest \
+    && cmake . -DRUN_IN_PLACE=TRUE -DBUILD_CLIENT=FALSE \
+    && make -j$(nproc) \
+    && make install \
+    && mkdir -p /etc/minetest \
+    && cp minetest.conf.example /etc/minetest/minetest.conf
+
+# Create minetest user
+RUN useradd -m -s /bin/bash minetest \
+    && mkdir -p /var/lib/minetest \
+    && chown -R minetest:minetest /var/lib/minetest
+
+WORKDIR /var/lib/minetest
+
+USER minetest
+
+EXPOSE 30000/udp 30000/tcp
+
+ENTRYPOINT ["/usr/local/bin/minetestserver"]
+CMD ["--config", "/etc/minetest/minetest.conf"] 
