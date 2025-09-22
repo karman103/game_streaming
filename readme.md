@@ -5,23 +5,23 @@ A professional cloud gaming platform that streams games from Docker containers t
 ## ✨ Features
 
 ### 🚀 Core Functionality
-- **Docker-based Game Execution**: Run games in isolated containers
-- **Real-time Video Streaming**: Low-latency HLS streaming with WebRTC support
-- **Multi-input Support**: Keyboard, mouse, and gamepad input handling
-- **Session Management**: Create, join, and manage game sessions
-- **Professional UI**: Modern, responsive interface with dark theme
+- ✅ **Docker-based Game Execution**: Run games in isolated containers
+- ✅ **Real-time Video Streaming**: Low-latency HLS streaming with WebRTC support
+- ✅ **Multi-input Support**: Keyboard, mouse, and gamepad input handling
+- ✅ **Session Management**: Create, join, and manage game sessions
+- ✅ **Professional UI**: Modern, responsive interface with dark theme
 
 ### 🎯 Supported Games
-- **Minetest**: Open-source voxel game engine
-- **RetroArch**: Cross-platform emulator frontend
-- **Custom Games**: Easy integration for new game types
+- ✅ **Minetest**: Open-source voxel game engine
+- ⏳ **RetroArch**: Cross-platform emulator frontend
+- ✅ **Custom Games**: Easy integration for new game types
 
 ### 🔧 Technical Features
-- **WebSocket Communication**: Real-time bidirectional communication
-- **Input Forwarding**: Seamless input translation to Docker containers
-- **Video Streaming**: FFmpeg-based screen capture and HLS streaming
-- **Container Orchestration**: Automatic port management and resource allocation
-- **Health Monitoring**: Real-time status updates and error handling
+- ✅ **WebSocket Communication**: Real-time bidirectional communication
+- ✅ **Input Forwarding**: Seamless input translation to Docker containers
+- ✅ **Video Streaming**: FFmpeg-based screen capture and HLS streaming
+- ✅ **Container Orchestration**: Automatic port management and resource allocation
+- ✅ **Health Monitoring**: Real-time status updates and error handling
 
 ## 🏗️ Architecture
 
@@ -280,16 +280,16 @@ For support and questions:
 
 ## ☸️ Kubernetes Deployment
 
-This project can run in Kubernetes and scale containers.
+✅ This project can run in Kubernetes and scale containers.
 
 ### Manifests
 
 Manifests are in `k8s/`:
-- `namespace.yaml`: Namespace `game-stream`
-- `rbac.yaml`: ServiceAccount/Role/RoleBinding to manage pods/services
-- `backend-deployment.yaml`: Backend Deployment + Service (ORCHESTRATOR=kubernetes)
-- `backend-hpa.yaml`: HorizontalPodAutoscaler for backend
-- `ingress.yaml`: Optional Ingress (requires NGINX Ingress)
+- ✅ `namespace.yaml`: Namespace `game-stream`
+- ✅ `rbac.yaml`: ServiceAccount/Role/RoleBinding to manage pods/services
+- ✅ `backend-deployment.yaml`: Backend Deployment + Service (ORCHESTRATOR=kubernetes)
+- ✅ `backend-hpa.yaml`: HorizontalPodAutoscaler for backend
+- ✅ `ingress.yaml`: Optional Ingress (requires NGINX Ingress)
 
 ### Deploy
 
@@ -313,15 +313,15 @@ kubectl apply -f k8s/backend-deployment.yaml
 
 ### Runtime Orchestrator
 
-When running in Kubernetes, the backend uses `kubectl` to create/delete per-session Pods and Services.
-- Set env `ORCHESTRATOR=kubernetes` (already configured in Deployment)
-- Namespace can be overridden via `K8S_NAMESPACE` (default: `game-stream`)
+✅ When running in Kubernetes, the backend uses `kubectl` to create/delete per-session Pods and Services.
+- ✅ Set env `ORCHESTRATOR=kubernetes` (already configured in Deployment)
+- ✅ Namespace can be overridden via `K8S_NAMESPACE` (default: `game-stream`)
 
 ### Scaling Game Sessions
 
-Each new session creates its own Pod (and NodePort Service for the game port).
-- The backend itself is autoscaled via HPA.
-- To scale concurrent session capacity, raise replica count:
+✅ Each new session creates its own Pod (and NodePort Service for the game port).
+- ✅ The backend itself is autoscaled via HPA.
+- ✅ To scale concurrent session capacity, raise replica count:
 ```bash
 kubectl scale deploy/backend -n game-stream --replicas=3
 ```
