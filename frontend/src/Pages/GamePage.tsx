@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import ImageStream from "../components/ImageStream";
-import GameStream from "../components/Stream";
 import MarioGame from "../components/ProxyForward";
 const GamePage: React.FC = () => {
   const { gameId } = useParams();

@@ -1,0 +1,4 @@
+FROM ubuntu:24.04
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y freeciv-server && rm -rf /var/lib/apt/lists/*
+EXPOSE 5556 5557
+CMD ["freeciv-server", "--no-stdin"]

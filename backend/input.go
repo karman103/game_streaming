@@ -48,7 +48,7 @@ func InputHandler(c *websocket.Conn) {
 		return
 	}
 
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := newDockerClient()
 	if err != nil {
 		log.Printf("Docker client error: %v", err)
 		return
@@ -137,6 +137,7 @@ func buildKeyboardCommand(input InputEvent) ([]string, error) {
 	keyMap := map[string]string{
 		"ArrowUp": "Up", "ArrowDown": "Down", "ArrowLeft": "Left", "ArrowRight": "Right",
 		"Enter": "Return", "Space": "space", "Escape": "Escape", "Tab": "Tab",
+		" ": "space",
 		"Backspace": "BackSpace", "Delete": "Delete", "Home": "Home", "End": "End",
 		"PageUp": "Prior", "PageDown": "Next", "F1": "F1", "F2": "F2", "F3": "F3",
 		"F4": "F4", "F5": "F5", "F6": "F6", "F7": "F7", "F8": "F8", "F9": "F9",
@@ -236,6 +237,7 @@ func executeCommand(cli *client.Client, containerID string, cmd []string) {
 	}
 	execResp, err := cli.ContainerExecCreate(context.Background(), containerID, container.ExecOptions{
 		Cmd:          cmd,
+		Env:          []string{"DISPLAY=:99"},
 		AttachStdout: true,
 		AttachStderr: true,
 	})

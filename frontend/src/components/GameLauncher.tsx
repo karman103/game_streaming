@@ -24,7 +24,6 @@ const GameLauncher: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [isStarting, setIsStarting] = useState(false);
 
   // Fetch available games

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/websocket/v2"
 )
@@ -88,17 +87,17 @@ func SetupStreamingRoutes(app *fiber.App) {
 		return serveHLSPlaylist(c, sessionID)
 	})
 
+	// Get stream info
+	app.Get("/api/stream/:id/info", func(c fiber.Ctx) error {
+		sessionID := c.Params("id")
+		return getStreamInfo(c, sessionID)
+	})
+
 	// Serve HLS segments
 	app.Get("/api/stream/:id/:segment", func(c fiber.Ctx) error {
 		sessionID := c.Params("id")
 		segment := c.Params("segment")
 		return serveHLSSegment(c, sessionID, segment)
-	})
-
-	// Get stream info
-	app.Get("/api/stream/:id/info", func(c fiber.Ctx) error {
-		sessionID := c.Params("id")
-		return getStreamInfo(c, sessionID)
 	})
 }
 
@@ -109,8 +108,7 @@ func serveHLSPlaylist(c fiber.Ctx, sessionID string) error {
 	streamDir := filepath.Join("/tmp", "streams", sessionID)
 	playlistPath := filepath.Join(streamDir, "playlist.m3u8")
 	if _, err := os.Stat(playlistPath); os.IsNotExist(err) {
-		playlist := createBasicPlaylist()
-		os.WriteFile(playlistPath, []byte(playlist), 0644)
+		return c.Status(503).JSON(fiber.Map{"error": "Stream not ready yet"})
 	}
 	c.Set("Content-Type", "application/vnd.apple.mpegurl")
 	return c.SendFile(playlistPath)
@@ -123,7 +121,7 @@ func serveHLSSegment(c fiber.Ctx, sessionID, segment string) error {
 	streamDir := filepath.Join("/tmp", "streams", sessionID)
 	segmentPath := filepath.Join(streamDir, segment)
 	if _, err := os.Stat(segmentPath); os.IsNotExist(err) {
-		createPlaceholderSegment(segmentPath)
+		return c.Status(404).JSON(fiber.Map{"error": "Segment not found"})
 	}
 	c.Set("Content-Type", "video/mp2t")
 	return c.SendFile(segmentPath)
@@ -138,31 +136,23 @@ func getStreamInfo(c fiber.Ctx, sessionID string) error {
 	streamInfo := StreamInfo{
 		SessionID:  sessionID,
 		StreamURL:  fmt.Sprintf("/api/stream/%s/playlist.m3u8", sessionID),
-		Status:     container.Status,
+		Status:     "initializing",
 		Quality:    "720p",
 		Resolution: "1280x720",
 		FPS:        30,
 		Bitrate:    2000,
 	}
+	if isStreamProcessRunning(sessionID) {
+		streamInfo.Status = "running"
+	}
+	playlistPath := filepath.Join("/tmp", "streams", sessionID, "playlist.m3u8")
+	if _, err := os.Stat(playlistPath); err == nil {
+		streamInfo.Status = "ready"
+	} else if container.Status == "running" && !isStreamProcessRunning(sessionID) {
+		streamInfo.Status = "error"
+	}
 
 	return c.JSON(streamInfo)
-}
-
-func createBasicPlaylist() string {
-	return `#EXTM3U
-#EXT-X-VERSION:3
-#EXT-X-TARGETDURATION:10
-#EXT-X-MEDIA-SEQUENCE:0
-#EXTINF:10.0,
-segment0.ts
-#EXT-X-ENDLIST`
-}
-
-func createPlaceholderSegment(path string) {
-	// Create a minimal MPEG-TS segment
-	// In production, this would be actual video data
-	placeholder := []byte("placeholder_video_segment")
-	os.WriteFile(path, placeholder, 0644)
 }
 
 // Advanced streaming functions for production use
@@ -184,6 +174,7 @@ func startFFmpegStreaming(container *GameContainer) error {
 		"-hls_flags", "delete_segments",
 		filepath.Join(streamDir, "playlist.m3u8"),
 	}
+	_ = cmd
 
 	log.Printf("Starting FFmpeg streaming for session %s", container.SessionID)
 	// In production, you would execute this command
@@ -191,7 +182,7 @@ func startFFmpegStreaming(container *GameContainer) error {
 }
 
 func captureContainerScreen(containerInfo *GameContainer) ([]byte, error) {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := newDockerClient()
 	if err != nil {
 		return nil, err
 	}

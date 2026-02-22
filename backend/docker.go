@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
@@ -29,7 +31,7 @@ func StartGameContainer(sessionID, gameType string) (*GameContainer, error) {
 		return startGameK8s(sessionID, gameType)
 	}
 
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := newDockerClient()
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +40,10 @@ func StartGameContainer(sessionID, gameType string) (*GameContainer, error) {
 	port := getAvailablePort()
 
 	// Configure container based on game type
-	config, hostConfig := getContainerConfig(gameType, port)
+	config, hostConfig := getContainerConfig(sessionID, gameType, port)
+	if err := ensureImageAvailable(cli, config.Image); err != nil {
+		return nil, err
+	}
 
 	resp, err := cli.ContainerCreate(context.Background(), config, hostConfig, nil, nil, sessionID)
 	if err != nil {
@@ -60,7 +65,6 @@ func StartGameContainer(sessionID, gameType string) (*GameContainer, error) {
 	}
 
 	activeContainers[sessionID] = gc
-	go setupVideoStreaming(gc)
 	log.Printf("Started game container %s for session %s", resp.ID, sessionID)
 	return gc, nil
 }
@@ -75,7 +79,7 @@ func StopGameContainer(sessionID string) error {
 		return fmt.Errorf("container not found for session %s", sessionID)
 	}
 
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := newDockerClient()
 	if err != nil {
 		return err
 	}
@@ -88,52 +92,60 @@ func StopGameContainer(sessionID string) error {
 	if err := cli.ContainerRemove(context.Background(), gc.ID, container.RemoveOptions{RemoveVolumes: true, Force: true}); err != nil {
 		log.Printf("Error removing container: %v", err)
 	}
+	stopVideoStreaming(sessionID)
 
 	delete(activeContainers, sessionID)
 	log.Printf("Stopped game container for session %s", sessionID)
 	return nil
 }
 
-func getContainerConfig(gameType string, port int) (*container.Config, *container.HostConfig) {
+func getContainerConfig(sessionID, gameType string, port int) (*container.Config, *container.HostConfig) {
 	switch gameType {
 	case "minetest":
-		return getMinetestConfig(port)
+		return getMinetestConfig(sessionID, port)
 	case "retroarch":
-		return getRetroArchConfig(port)
+		return getRetroArchConfig(sessionID, port)
+	case "freeciv":
+		return getFreecivConfig(sessionID)
 	default:
-		return getDefaultConfig(port)
+		return getDefaultConfig(sessionID, port)
 	}
 }
 
-func getMinetestConfig(port int) (*container.Config, *container.HostConfig) {
-	// Expose both UDP/TCP 30000
-	portUDP, _ := nat.NewPort("udp", "30000")
-	portTCP, _ := nat.NewPort("tcp", "30000")
+func getMinetestConfig(sessionID string, port int) (*container.Config, *container.HostConfig) {
+	streamDir := filepath.Join("/tmp", "streams", sessionID)
+	_ = os.MkdirAll(streamDir, 0755)
 
 	config := &container.Config{
-		Image: "alpine:3.19",
+		Image: "ubuntu:22.04",
 		Cmd: []string{
 			"sh", "-c",
-			"apk add --no-cache minetest-server && minetestserver --worldname docker_world --port 30000",
-		},
-		ExposedPorts: nat.PortSet{
-			portUDP: struct{}{},
-			portTCP: struct{}{},
+			"apt-get update && " +
+				"DEBIAN_FRONTEND=noninteractive apt-get install -y " +
+				"minetest xdotool xvfb ffmpeg fluxbox x11-utils x11-xserver-utils && " +
+				"Xvfb :99 -screen 0 1280x720x24 & " +
+				"sleep 1 && " +
+				"export DISPLAY=:99 && " +
+				"fluxbox >/tmp/fluxbox.log 2>&1 & " +
+				"minetest >/tmp/minetest.log 2>&1 & " +
+				"sleep 2 && " +
+				"ffmpeg -hide_banner -loglevel error -f x11grab -video_size 1280x720 -framerate 30 " +
+				"-i :99.0 -an -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p " +
+				"-g 60 -keyint_min 60 -sc_threshold 0 -f hls -hls_time 1 -hls_list_size 6 " +
+				"-hls_flags delete_segments+append_list+independent_segments " +
+				"-hls_segment_filename /tmp/streams/segment_%03d.ts /tmp/streams/playlist.m3u8",
 		},
 		Tty: true,
 	}
 
 	hostConfig := &container.HostConfig{
-		PortBindings: nat.PortMap{
-			portUDP: []nat.PortBinding{{HostPort: fmt.Sprintf("%d", port)}},
-			portTCP: []nat.PortBinding{{HostPort: fmt.Sprintf("%d", port)}},
-		},
+		Binds:      []string{fmt.Sprintf("%s:/tmp/streams", streamDir)},
 		AutoRemove: true,
 	}
 	return config, hostConfig
 }
 
-func getRetroArchConfig(port int) (*container.Config, *container.HostConfig) {
+func getRetroArchConfig(_ string, port int) (*container.Config, *container.HostConfig) {
 	portHTTP, _ := nat.NewPort("tcp", "8080")
 
 	config := &container.Config{
@@ -153,7 +165,26 @@ func getRetroArchConfig(port int) (*container.Config, *container.HostConfig) {
 	return config, hostConfig
 }
 
-func getDefaultConfig(port int) (*container.Config, *container.HostConfig) {
+func getFreecivConfig(sessionID string) (*container.Config, *container.HostConfig) {
+	streamDir := filepath.Join("/tmp", "streams", sessionID)
+	_ = os.MkdirAll(streamDir, 0755)
+
+	config := &container.Config{
+		Image: "freeciv-combined",
+		Env:   []string{"DISPLAY=:99"},
+		Cmd:   []string{"/home/freeciv/start.sh"},
+		Tty:   true,
+	}
+
+	hostConfig := &container.HostConfig{
+		Binds:      []string{fmt.Sprintf("%s:/tmp/streams", streamDir)},
+		AutoRemove: true,
+	}
+
+	return config, hostConfig
+}
+
+func getDefaultConfig(_ string, port int) (*container.Config, *container.HostConfig) {
 	config := &container.Config{
 		Image: "ubuntu:22.04",
 		Cmd:   []string{"sleep", "infinity"},
@@ -173,19 +204,6 @@ func setupVideoStreaming(container *GameContainer) {
 	go startFFmpegStream(container, streamDir)
 }
 
-func startFFmpegStream(container *GameContainer, streamDir string) {
-	streamFile := filepath.Join(streamDir, "stream.m3u8")
-	content := `#EXTM3U
-#EXT-X-VERSION:3
-#EXT-X-TARGETDURATION:10
-#EXT-X-MEDIA-SEQUENCE:0
-#EXTINF:10.0,
-segment0.ts
-#EXT-X-ENDLIST`
-	os.WriteFile(streamFile, []byte(content), 0644)
-	log.Printf("Created stream file for session %s", container.SessionID)
-}
-
 func GetContainer(sessionID string) (*GameContainer, error) {
 	gc, exists := activeContainers[sessionID]
 	if !exists {
@@ -195,3 +213,22 @@ func GetContainer(sessionID string) (*GameContainer, error) {
 }
 
 func ListActiveContainers() map[string]*GameContainer { return activeContainers }
+
+func ensureImageAvailable(cli *client.Client, imageName string) error {
+	if imageName == "" {
+		return fmt.Errorf("container image is empty")
+	}
+
+	if _, err := cli.ImageInspect(context.Background(), imageName); err == nil {
+		return nil
+	}
+
+	log.Printf("Pulling missing image: %s", imageName)
+	reader, err := cli.ImagePull(context.Background(), imageName, image.PullOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to pull image %s: %w", imageName, err)
+	}
+	defer reader.Close()
+	_, _ = io.Copy(io.Discard, reader)
+	return nil
+}
